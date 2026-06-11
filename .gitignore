@@ -142,5 +142,15 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
+# Expo / React Native (app/)
+.expo/
+**/.expo/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+# Generated native projects (app/ios, app/android)
+app/ios/
+app/android/
+
 
 planning/
