@@ -30,7 +30,13 @@ if (!isSupabaseConfigured) {
   );
 }
 
+// Fall back to non-empty placeholders, not '' — createClient throws
+// "supabaseUrl is required." on an empty string, which would crash at module
+// load and white-screen the app before RootScreen can render the "not
+// configured" indicator. RootScreen guards every query behind
+// isSupabaseConfigured, so this placeholder client is constructed but never
+// actually queried.
 export const supabase = createClient(
-  supabaseUrl ?? '',
-  supabaseAnonKey ?? '',
+  supabaseUrl ?? 'http://localhost:54321',
+  supabaseAnonKey ?? 'anon-key-missing',
 );
