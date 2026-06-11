@@ -15,12 +15,17 @@ create table if not exists public.ping (
 -- deployment.
 alter table public.ping enable row level security;
 
+-- Postgres has no "create policy if not exists", so drop-then-create keeps the
+-- whole migration idempotent — re-applying it against a stale shared container
+-- (without a full db reset) won't fail with "policy already exists".
+drop policy if exists "ping anon insert (local dev)" on public.ping;
 create policy "ping anon insert (local dev)"
   on public.ping
   for insert
   to anon
   with check (true);
 
+drop policy if exists "ping anon select (local dev)" on public.ping;
 create policy "ping anon select (local dev)"
   on public.ping
   for select
