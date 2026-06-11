@@ -42,9 +42,12 @@ Function, and finally the Expo app in the foreground. **Ctrl-C** stops `make dev
 down the mock + Edge Function (a non-zero exit on Ctrl-C is normal). Supabase keeps running
 in Docker so restarts are fast — run `make down` (`npx supabase stop`) to stop it too.
 
-> The Edge Function runs inside Docker, so it reaches the host's mock Strava via
-> `host.docker.internal:3000`. `make dev` writes that override to a gitignored
-> `supabase/functions/.env` automatically — no manual setup.
+> `make dev` seeds the local env files on first run — no manual setup:
+> - `app/.env` from `app/.env.example` (the app's Supabase config), and
+> - `supabase/functions/.env` with `STRAVA_BASE_URL=http://host.docker.internal:3000`,
+>   the override the Dockerized Edge Function needs to reach the host's mock Strava.
+>
+> Both are gitignored. Existing files are left untouched, so local edits survive.
 
 ### Smoke test (proves the slice end-to-end)
 

@@ -46,6 +46,8 @@ dev:
 	@echo "==> Writing edge-function env ($(EDGE_ENV_FILE))…"
 	@mkdir -p supabase/functions
 	@printf 'STRAVA_BASE_URL=http://host.docker.internal:3000\n' > $(EDGE_ENV_FILE)
+	@echo "==> Seeding app/.env from app/.env.example (first run only)…"
+	@test -f app/.env || cp app/.env.example app/.env
 	@echo "==> Launching mock Strava (:3000), edge fn, and Expo web (:8081)…"
 	@trap 'kill 0 2>/dev/null' EXIT; \
 		npm --prefix mock-strava run mock & \
