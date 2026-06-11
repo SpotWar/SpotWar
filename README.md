@@ -9,18 +9,27 @@ component — see [ARCHITECTURE.md](ARCHITECTURE.md) for the component map.
 
 ## Local development
 
-One command brings up the full "hello world" slice (Expo ↔ Supabase ↔ mock Strava):
+One command brings up the full "hello world" slice (Expo ↔ Supabase ↔ mock Strava). Pick
+the platform you want the app on:
 
 ```bash
-make dev
+make dev        # = make web — app on web at http://localhost:8081
+make web        # same as make dev
+make ios        # app in the iOS Simulator
+make android    # app in the Android emulator
 ```
+
+All four launch the same backend (Supabase + mock Strava + the `ping-strava` Edge Function);
+they differ only in where the app runs.
 
 ### Prerequisites
 
 - **Node** (with `npm`) — installs the `mock-strava` and `app` packages.
 - **Docker running** — `npx supabase start` needs it; start Docker/OrbStack first or
-  `make dev` will fail at the Supabase step.
+  the target will fail at the Supabase step.
 - **`npx supabase`** — the Supabase CLI, run via `npx` (no global install needed).
+- **iOS only:** **Xcode** (for the iOS Simulator).
+- **Android only:** **Android Studio** with a **running AVD** (emulator) before `make android`.
 
 First checkout only, install the npm dependencies:
 
@@ -28,21 +37,31 @@ First checkout only, install the npm dependencies:
 make install     # = npm --prefix mock-strava install && npm --prefix app install
 ```
 
-### What `make dev` starts
+### What the targets start
 
 | Service | Command | Port |
 |---|---|---|
 | Supabase (API/DB/Studio, applies migrations) | `npx supabase start` | API `54321`, DB `54322`, Studio `54323` |
 | Mock Strava server | `npm --prefix mock-strava run mock` | `3000` |
 | `ping-strava` Edge Function | `npx supabase functions serve ping-strava` | served on `54321/functions/v1/` |
-| Expo app (web) | `npm --prefix app run web` | `8081` |
+| Expo app | `npm --prefix app run web` / `ios` / `android` | web on `8081` |
 
-`make dev` starts Supabase first (slowest, needed by the rest), then the mock, the Edge
-Function, and finally the Expo app in the foreground. **Ctrl-C** stops `make dev` and tears
+Each target starts Supabase first (slowest, needed by the rest), then the mock, the Edge
+Function, and finally the Expo app in the foreground. **Ctrl-C** stops the run and tears
 down the mock + Edge Function (a non-zero exit on Ctrl-C is normal). Supabase keeps running
 in Docker so restarts are fast — run `make down` (`npx supabase stop`) to stop it too.
 
-> `make dev` seeds the local env files on first run — no manual setup:
+**Android host networking:** the Android emulator can't reach the host's `localhost`, so
+`make android` runs the app with `EXPO_PUBLIC_SUPABASE_URL=http://10.0.2.2:54321`
+(`10.0.2.2` is the emulator's alias for the host). It's passed as a shell env var that
+overrides `app/.env` automatically — you don't edit `app/.env`. iOS and web use `localhost`
+as-is (the Simulator shares the host loopback).
+
+> **Verification status:** only the **web** target is verified end-to-end so far (see the
+> smoke test below). `make ios` / `make android` are wired the same way but have not yet
+> been run against a real simulator/emulator.
+
+> Every target seeds the local env files on first run — no manual setup:
 > - `app/.env` from `app/.env.example` (the app's Supabase config), and
 > - `supabase/functions/.env` with `STRAVA_BASE_URL=http://host.docker.internal:3000`,
 >   the override the Dockerized Edge Function needs to reach the host's mock Strava.
@@ -51,7 +70,7 @@ in Docker so restarts are fast — run `make down` (`npx supabase stop`) to stop
 
 ### Smoke test (proves the slice end-to-end)
 
-With `make dev` up, confirm each leg of the vertical slice:
+With `make dev` (web) up, confirm each leg of the vertical slice:
 
 1. **App loads on web.** Open <http://localhost:8081> — the screen shows
    **"Supabase: configured"** (the env from `app/.env` resolved).
