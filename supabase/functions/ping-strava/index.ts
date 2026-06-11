@@ -20,7 +20,15 @@ const STRAVA_BASE_URL = Deno.env.get("STRAVA_BASE_URL") ??
 
 Deno.serve(async () => {
   try {
-    const res = await fetch(`${STRAVA_BASE_URL}/api/v3/athlete`);
+    // Token pass-through hook: the mock needs no auth, but real Strava 401s
+    // without a Bearer token. Full OAuth (token exchange/refresh) is EPIC 2's
+    // job — here we just forward STRAVA_ACCESS_TOKEN if it's provided.
+    const accessToken = Deno.env.get("STRAVA_ACCESS_TOKEN");
+    const headers = accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
+      : undefined;
+
+    const res = await fetch(`${STRAVA_BASE_URL}/api/v3/athlete`, { headers });
 
     if (!res.ok) {
       return Response.json(
