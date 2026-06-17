@@ -3,9 +3,11 @@
     "name": "SpotWar",
     "slug": "spotwar",
     "version": "0.1.0",
+    "scheme": "spotwar",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["expo-router"],
     "ios": {
       "supportsTablet": true
     },
@@ -19,7 +21,9 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
     }
   }
 }
