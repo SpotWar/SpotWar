@@ -87,6 +87,11 @@ const styles = StyleSheet.create({
   phoneContent: {
     flex: 1,
     flexGrow: 1,
+    width: '100%',
+    // Cap + center the column on wider-than-phone web windows (below the 900px
+    // split breakpoint) so content doesn't sprawl edge-to-edge.
+    maxWidth: 440,
+    alignSelf: 'center',
     paddingHorizontal: SCREEN_PADDING,
   },
   wideRoot: { flex: 1, flexDirection: 'row', backgroundColor: colors.bg },

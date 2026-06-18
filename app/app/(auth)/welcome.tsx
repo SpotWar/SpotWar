@@ -92,13 +92,21 @@ const styles = StyleSheet.create({
   phoneRoot: { flex: 1, backgroundColor: colors.bg },
   phoneContent: {
     flex: 1,
+    width: '100%',
+    // Cap the column on wider-than-phone web windows (below the 900px split
+    // breakpoint) so content stays phone-sized and centered instead of sprawling.
+    maxWidth: 440,
+    alignSelf: 'center',
     paddingHorizontal: SCREEN_PADDING,
     justifyContent: 'flex-end',
   },
   hero: { flex: 1, justifyContent: 'center', gap: 18 },
   title: { maxWidth: 300 },
   body: { maxWidth: 300 },
-  actions: { gap: 12 },
+  // Guaranteed separation from the hero block: the hero is flex:1 and centers
+  // its content, so without this the body text can sit right on the buttons when
+  // the viewport is short (e.g. web windows).
+  actions: { gap: 12, marginTop: 32 },
   runners: {
     flexDirection: 'row',
     alignItems: 'center',

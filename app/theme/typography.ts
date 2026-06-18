@@ -15,7 +15,10 @@ export function heading(size: number): TextStyle {
   return {
     fontFamily: fonts.display,
     fontSize: size,
-    lineHeight: size, // line-height: 1.0
+    // Web (CSS) doesn't clip overflowing glyphs, so keep the design's tight 1.0
+    // leading there. Native clips to the line box and Anton's accented caps (À,
+    // É) overflow it — give them headroom so the accent isn't sliced off.
+    lineHeight: Platform.OS === 'web' ? size : size * 1.25,
     letterSpacing: size * 0.01,
     textTransform: 'uppercase',
     color: colors.text,

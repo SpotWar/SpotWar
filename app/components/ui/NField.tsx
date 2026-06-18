@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -157,6 +158,9 @@ const styles = StyleSheet.create({
     color: colors.text,
     // Strip Android's default vertical padding so the value centers in the 54px row.
     paddingVertical: 0,
+    // react-native-web renders the input as a DOM <input>; kill the browser's
+    // blue focus outline so only the design's green ring shows.
+    ...Platform.select({ web: { outlineWidth: 0 }, default: {} }),
   },
   helperRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 8 },
   helperText: {
