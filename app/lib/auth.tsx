@@ -27,10 +27,68 @@ export type SignUpInput = {
   password: string;
   nametag: string;
   preferred_language: 'fr' | 'en';
+  // Where the verification email link should land. Optional: callers (subtask
+  // 03) supply the concrete per-platform URL — a native deep link, or a web URL.
+  // 01 allow-lists these in additional_redirect_urls.
+  emailRedirectTo?: string;
 };
 
 /** Uniform result so screens branch on `error` without try/catch around await. */
 export type AuthResult = { error: AuthError | null };
+
+/** The auth action methods, independent of React state. */
+export type AuthActions = {
+  signUp: (input: SignUpInput) => Promise<AuthResult>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<AuthResult>;
+  resetPassword: (email: string, redirectTo?: string) => Promise<AuthResult>;
+};
+
+/**
+ * Build the auth action methods over a given client. Factored out of the
+ * component so the request-shaping (e.g. forwarding `emailRedirectTo` /
+ * `redirectTo`, and `{ nametag, preferred_language }` as `options.data`) is
+ * unit-testable against a fake client without mounting the provider — rendering
+ * it under RTL is blocked by supabase-js's effect on the test renderer.
+ */
+export function makeAuthActions(client: SupabaseClient): AuthActions {
+  return {
+    signUp: async ({
+      email,
+      password,
+      nametag,
+      preferred_language,
+      emailRedirectTo,
+    }) => {
+      // nametag + preferred_language ride along as user metadata; subtask 01's
+      // handle_new_user() trigger reads them to seed the profiles row.
+      // emailRedirectTo points the verification link at the right URL.
+      const { error } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { nametag, preferred_language }, emailRedirectTo },
+      });
+      return { error };
+    },
+    signIn: async (email, password) => {
+      const { error } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    },
+    signOut: async () => {
+      const { error } = await client.auth.signOut();
+      return { error };
+    },
+    resetPassword: async (email, redirectTo) => {
+      const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+      return { error };
+    },
+  };
+}
 
 type AuthContextValue = {
   session: Session | null;
@@ -46,7 +104,9 @@ type AuthContextValue = {
   signUp: (input: SignUpInput) => Promise<AuthResult>;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
-  resetPassword: (email: string) => Promise<AuthResult>;
+  // `redirectTo` is where the reset-password email link lands; optional so 03
+  // can supply the per-platform URL (01 allow-lists it in additional_redirect_urls).
+  resetPassword: (email: string, redirectTo?: string) => Promise<AuthResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -114,31 +174,7 @@ export function AuthProvider({
       user: session?.user ?? null,
       profile,
       loading,
-      signUp: async ({ email, password, nametag, preferred_language }) => {
-        // nametag + preferred_language ride along as user metadata; subtask 01's
-        // handle_new_user() trigger reads them to seed the profiles row.
-        const { error } = await client.auth.signUp({
-          email,
-          password,
-          options: { data: { nametag, preferred_language } },
-        });
-        return { error };
-      },
-      signIn: async (email, password) => {
-        const { error } = await client.auth.signInWithPassword({
-          email,
-          password,
-        });
-        return { error };
-      },
-      signOut: async () => {
-        const { error } = await client.auth.signOut();
-        return { error };
-      },
-      resetPassword: async (email) => {
-        const { error } = await client.auth.resetPasswordForEmail(email);
-        return { error };
-      },
+      ...makeAuthActions(client),
     };
   }, [client, session, profile, loading]);
 
