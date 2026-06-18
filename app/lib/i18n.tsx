@@ -26,24 +26,85 @@ const fr = {
   'common.continue': 'Continuer',
   'common.back': 'Retour',
   'common.loading': 'Chargement…',
-  'language.title': 'Choisis ta langue',
+  'common.season': 'Montréal · Saison 01',
+
+  'language.title': 'Choisis ta\nlangue',
+  'language.subtitle': 'Choose your language',
+  'language.step': 'Étape 1 / 6',
   'language.french': 'Français',
+  'language.frenchRegion': 'Québec',
   'language.english': 'English',
-  'auth.welcome.title': 'Bienvenue',
-  'auth.signUp.title': 'Créer un compte',
+  'language.englishRegion': 'Canada',
+
+  'auth.welcome.tag': 'Montréal · Saison 01',
+  'auth.welcome.title': 'Conquiers ta\nville. Une\ncourse à la fois.',
+  'auth.welcome.body':
+    'Transforme tes kilomètres en territoire. Conquiers des quartiers, attaque tes rivaux, tiens la carte jusqu’à la fin de la saison.',
+  'auth.welcome.create': 'Créer un compte',
+  'auth.welcome.haveAccount': 'J’ai déjà un compte',
+  'auth.welcome.runnersCount': '4 800 coureurs sur le terrain',
+
+  'auth.signUp.step': 'Étape 2 / 6',
+  'auth.signUp.title': 'Enrôle-toi',
+  'auth.signUp.subtitle':
+    'Choisis un pseudo — c’est ainsi que tes rivaux te reconnaîtront.',
   'auth.signUp.nametag': 'Pseudo',
+  'auth.signUp.nametagPlaceholder': 'maxime_t',
   'auth.signUp.email': 'E-mail',
+  'auth.signUp.emailPlaceholder': 'toi@spotwar.run',
   'auth.signUp.password': 'Mot de passe',
-  'auth.signUp.submit': "S'inscrire",
-  'auth.login.title': 'Connexion',
+  'auth.signUp.passwordRule': 'Min. 8 caractères · 1 majuscule · 1 chiffre · 1 symbole',
+  'auth.signUp.terms': 'J’accepte les Conditions & la Politique de confidentialité.',
+  'auth.signUp.submit': 'Créer un compte',
+  'auth.signUp.submitting': 'Création du compte…',
+  'auth.signUp.footer': 'Déjà enrôlé ?',
+  'auth.signUp.footerLink': 'Connexion',
+
+  'auth.strength.weak': 'Faible',
+  'auth.strength.fair': 'Moyen',
+  'auth.strength.strong': 'Fort',
+
+  'auth.login.title': 'Re-bonjour,\nsoldat',
+  'auth.login.subtitle': 'La carte a bougé pendant ton absence.',
+  'auth.login.email': 'E-mail',
+  'auth.login.emailPlaceholder': 'toi@spotwar.run',
+  'auth.login.password': 'Mot de passe',
   'auth.login.submit': 'Se connecter',
+  'auth.login.submitting': 'Connexion…',
   'auth.login.forgot': 'Mot de passe oublié ?',
-  'auth.verify.title': 'Vérifie ton e-mail',
+  'auth.login.footer': 'Nouveau dans la guerre ?',
+  'auth.login.footerLink': 'Enrôle-toi',
+
+  'auth.verify.tag': 'Vérification requise',
+  'auth.verify.title': 'Vérifie ta\nboîte mail',
   'auth.verify.body':
-    "Nous t'avons envoyé un lien de confirmation. Clique dessus pour activer ton compte.",
-  'auth.verify.resend': 'Renvoyer l’e-mail',
-  'auth.forgot.title': 'Réinitialiser le mot de passe',
+    'Nous avons envoyé un lien de vérification à {email}. Confirme-le pour te déployer.',
+  'auth.verify.openMail': 'Ouvrir l’app mail',
+  'auth.verify.resend': 'Renvoyer le lien',
+  'auth.verify.resendIn': 'Renvoyer le lien · {seconds}',
+  'auth.verify.resent': 'E-mail renvoyé.',
+  'auth.verify.changeAddress': 'Mauvaise adresse ?',
+  'auth.verify.changeAddressLink': 'La modifier',
+
+  'auth.forgot.title': 'Réinitialiser\nl’accès',
+  'auth.forgot.body':
+    'Entre ton e-mail et nous t’enverrons un lien pour reprendre le contrôle de ton compte.',
+  'auth.forgot.email': 'E-mail',
+  'auth.forgot.emailPlaceholder': 'toi@spotwar.run',
   'auth.forgot.submit': 'Envoyer le lien',
+  'auth.forgot.submitting': 'Envoi…',
+  'auth.forgot.sent': 'Lien envoyé. Vérifie ta boîte mail.',
+  'auth.forgot.footer': 'Tu t’en souviens ?',
+  'auth.forgot.footerLink': 'Retour à la connexion',
+
+  'auth.error.invalidEmail': 'Cet e-mail ne semble pas valide',
+  'auth.error.nametagTaken': 'Pseudo déjà pris — essaie un autre',
+  'auth.error.emailTaken': 'Cet e-mail est déjà enrôlé',
+  'auth.error.passwordWeak':
+    'Min. 8 caractères · 1 majuscule · 1 chiffre · 1 symbole',
+  'auth.error.invalidCredentials': 'E-mail ou mot de passe invalide',
+  'auth.error.emailNotConfirmed': 'Confirme ton e-mail avant de te connecter',
+  'auth.error.generic': 'Une erreur est survenue. Réessaie.',
 } as const;
 
 /** The set of valid translation keys, fixed by the FR dictionary. */
@@ -55,24 +116,83 @@ const en: Dict = {
   'common.continue': 'Continue',
   'common.back': 'Back',
   'common.loading': 'Loading…',
-  'language.title': 'Choose your language',
+  'common.season': 'Montréal · Season 01',
+
+  'language.title': 'Choose your\nlanguage',
+  'language.subtitle': 'Choisis ta langue',
+  'language.step': 'Step 1 / 6',
   'language.french': 'Français',
+  'language.frenchRegion': 'Québec',
   'language.english': 'English',
-  'auth.welcome.title': 'Welcome',
-  'auth.signUp.title': 'Create an account',
+  'language.englishRegion': 'Canada',
+
+  'auth.welcome.tag': 'Montréal · Season 01',
+  'auth.welcome.title': 'Claim your\ncity. One run\nat a time.',
+  'auth.welcome.body':
+    'Turn your kilometres into territory. Conquer neighbourhoods, raid rivals, hold the map till the season ends.',
+  'auth.welcome.create': 'Create account',
+  'auth.welcome.haveAccount': 'I already have an account',
+  'auth.welcome.runnersCount': '4 800 runners in the field',
+
+  'auth.signUp.step': 'Step 2 / 6',
+  'auth.signUp.title': 'Enlist',
+  'auth.signUp.subtitle': 'Pick a nametag — it’s how rivals will know you.',
   'auth.signUp.nametag': 'Nametag',
+  'auth.signUp.nametagPlaceholder': 'maxime_t',
   'auth.signUp.email': 'Email',
+  'auth.signUp.emailPlaceholder': 'you@spotwar.run',
   'auth.signUp.password': 'Password',
-  'auth.signUp.submit': 'Sign up',
-  'auth.login.title': 'Log in',
+  'auth.signUp.passwordRule': 'Min 8 chars · 1 uppercase · 1 number · 1 symbol',
+  'auth.signUp.terms': 'I agree to the Terms & Privacy Policy.',
+  'auth.signUp.submit': 'Create account',
+  'auth.signUp.submitting': 'Creating account…',
+  'auth.signUp.footer': 'Already enlisted?',
+  'auth.signUp.footerLink': 'Log in',
+
+  'auth.strength.weak': 'Weak',
+  'auth.strength.fair': 'Fair',
+  'auth.strength.strong': 'Strong',
+
+  'auth.login.title': 'Welcome\nback, soldier',
+  'auth.login.subtitle': 'The map shifted while you were gone.',
+  'auth.login.email': 'Email',
+  'auth.login.emailPlaceholder': 'you@spotwar.run',
+  'auth.login.password': 'Password',
   'auth.login.submit': 'Log in',
+  'auth.login.submitting': 'Logging in…',
   'auth.login.forgot': 'Forgot password?',
-  'auth.verify.title': 'Verify your email',
+  'auth.login.footer': 'New to the war?',
+  'auth.login.footerLink': 'Enlist now',
+
+  'auth.verify.tag': 'Verification required',
+  'auth.verify.title': 'Check your\ninbox',
   'auth.verify.body':
-    'We sent you a confirmation link. Tap it to activate your account.',
-  'auth.verify.resend': 'Resend email',
-  'auth.forgot.title': 'Reset password',
-  'auth.forgot.submit': 'Send link',
+    'We dispatched a verification link to {email}. Confirm it to deploy.',
+  'auth.verify.openMail': 'Open mail app',
+  'auth.verify.resend': 'Resend link',
+  'auth.verify.resendIn': 'Resend link · {seconds}',
+  'auth.verify.resent': 'Email resent.',
+  'auth.verify.changeAddress': 'Wrong address?',
+  'auth.verify.changeAddressLink': 'Change it',
+
+  'auth.forgot.title': 'Reset\naccess',
+  'auth.forgot.body':
+    'Enter your email and we’ll send a link to regain command of your account.',
+  'auth.forgot.email': 'Email',
+  'auth.forgot.emailPlaceholder': 'you@spotwar.run',
+  'auth.forgot.submit': 'Send reset link',
+  'auth.forgot.submitting': 'Sending…',
+  'auth.forgot.sent': 'Link sent. Check your inbox.',
+  'auth.forgot.footer': 'Remembered it?',
+  'auth.forgot.footerLink': 'Back to login',
+
+  'auth.error.invalidEmail': 'That doesn’t look like a valid email',
+  'auth.error.nametagTaken': 'Nametag already taken — try another',
+  'auth.error.emailTaken': 'That email is already enlisted',
+  'auth.error.passwordWeak': 'Min 8 chars · 1 uppercase · 1 number · 1 symbol',
+  'auth.error.invalidCredentials': 'Invalid email or password',
+  'auth.error.emailNotConfirmed': 'Confirm your email before logging in',
+  'auth.error.generic': 'Something went wrong. Try again.',
 };
 
 const dictionaries: Record<Language, Dict> = { fr, en };
@@ -84,21 +204,33 @@ function isLanguage(value: string | null): value is Language {
   return value === 'fr' || value === 'en';
 }
 
+/** Named `{placeholder}` substitutions passed to `t()` / `translate()`. */
+export type TranslationVars = Record<string, string | number>;
+
 /**
- * Resolve a key against a language's dictionary. Exported as a pure function so
- * it is unit-testable without mounting the provider; the hook wraps it with the
- * current language. Falls back to the key itself if absent (only reachable for a
- * key that bypassed the `TranslationKey` type, e.g. a dynamic string).
+ * Resolve a key against a language's dictionary, substituting any `{name}`
+ * placeholders from `vars`. Exported as a pure function so it is unit-testable
+ * without mounting the provider; the hook wraps it with the current language.
+ * Falls back to the key itself if absent (only reachable for a key that bypassed
+ * the `TranslationKey` type, e.g. a dynamic string).
  */
-export function translate(language: Language, key: TranslationKey): string {
-  return dictionaries[language][key] ?? key;
+export function translate(
+  language: Language,
+  key: TranslationKey,
+  vars?: TranslationVars,
+): string {
+  const raw = dictionaries[language][key] ?? key;
+  if (!vars) return raw;
+  return raw.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in vars ? String(vars[name]) : match,
+  );
 }
 
 type I18nContextValue = {
   language: Language;
   /** True until the persisted language has been read on first mount. */
   loading: boolean;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, vars?: TranslationVars) => string;
   setLanguage: (language: Language) => Promise<void>;
 };
 
@@ -135,7 +267,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: TranslationKey) => translate(language, key),
+    (key: TranslationKey, vars?: TranslationVars) =>
+      translate(language, key, vars),
     [language],
   );
 
