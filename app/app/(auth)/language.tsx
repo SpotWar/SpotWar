@@ -1,53 +1,134 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { colors, fonts, radius } from '../../theme/tokens';
 import { useI18n, SUPPORTED_LANGUAGES, type Language } from '../../lib/i18n';
+import {
+  AuthShell,
+  NButton,
+  NTopBar,
+  Icon,
+  Heading,
+  Mono,
+} from '../../components/ui';
 
 /**
- * Language selector. This placeholder already wires the real i18n contract —
- * tapping a language persists it via `setLanguage` — because subtask 03's visual
- * pass only restyles it; the behavior (persist + apply globally) lives here.
+ * Language selection (onboarding step 1/6). Two selectable cards (FR default).
+ * The choice is staged locally and only persisted via `setLanguage` on Continue,
+ * so the screen previews the pick (the whole app reskins its strings) without
+ * committing until the user advances — then routes on to sign-up.
  */
 export default function LanguageScreen() {
-  const { language, setLanguage, t } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const router = useRouter();
+  const [selected, setSelected] = useState<Language>(language);
 
-  const choose = async (next: Language) => {
-    await setLanguage(next);
-    router.back();
+  const meta: Record<Language, { code: string; name: string; region: string }> = {
+    fr: {
+      code: 'FR',
+      name: t('language.french'),
+      region: t('language.frenchRegion'),
+    },
+    en: {
+      code: 'EN',
+      name: t('language.english'),
+      region: t('language.englishRegion'),
+    },
+  };
+
+  const onContinue = async () => {
+    await setLanguage(selected);
+    router.push('/(auth)/sign-up');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t('language.title')}</Text>
-      {SUPPORTED_LANGUAGES.map((lang) => (
-        <Pressable
-          key={lang}
-          onPress={() => choose(lang)}
-          style={[styles.option, lang === language && styles.optionActive]}
-        >
-          <Text>{lang === 'fr' ? t('language.french') : t('language.english')}</Text>
-        </Pressable>
-      ))}
-    </View>
+    <AuthShell>
+      <NTopBar stepLabel={t('language.step')} />
+      <Heading style={styles.title}>{t('language.title')}</Heading>
+      <Mono style={styles.subtitle}>{t('language.subtitle')}</Mono>
+
+      <View style={styles.cards}>
+        {SUPPORTED_LANGUAGES.map((lang) => {
+          const on = selected === lang;
+          const m = meta[lang];
+          return (
+            <Pressable
+              key={lang}
+              testID={`lang-${lang}`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: on }}
+              onPress={() => setSelected(lang)}
+              style={[styles.card, on && styles.cardActive]}
+            >
+              <View style={styles.codeTile}>
+                <Text style={[styles.code, { color: on ? colors.accent : colors.text }]}>
+                  {m.code}
+                </Text>
+              </View>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardName}>{m.name}</Text>
+                <Mono style={styles.cardRegion}>{m.region}</Mono>
+              </View>
+              <View style={[styles.radio, on && styles.radioOn]}>
+                {on && <Icon name="check" size={14} color={colors.onAccent} />}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <View style={styles.spacer} />
+      <NButton
+        label={t('common.continue')}
+        icon="arrow"
+        onPress={onContinue}
+        testID="language-continue"
+      />
+    </AuthShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  title: { marginBottom: 6 },
+  subtitle: { marginBottom: 26 },
+  cards: { gap: 12 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 18,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1.5,
+    borderColor: colors.line,
+  },
+  cardActive: { backgroundColor: colors.accentDim, borderColor: colors.accent },
+  codeTile: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.control,
+    backgroundColor: colors.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    padding: 26,
   },
-  title: { fontSize: 24, fontWeight: '700' },
-  option: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.16)',
+  code: { fontFamily: fonts.display, fontSize: 18 },
+  cardBody: { flex: 1 },
+  cardName: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 17,
+    color: colors.text,
   },
-  optionActive: { borderColor: '#9DAE3C', borderWidth: 2 },
+  cardRegion: { marginTop: 3, color: colors.muted },
+  radio: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.lineStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOn: { borderColor: colors.accent, backgroundColor: colors.accent },
+  spacer: { flexGrow: 1, minHeight: 24 },
 });

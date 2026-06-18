@@ -27,7 +27,7 @@ function Probe() {
   return (
     <>
       <Text testID="lang">{loading ? 'loading' : language}</Text>
-      <Text testID="title">{t('auth.login.title')}</Text>
+      <Text testID="title">{t('auth.login.submit')}</Text>
       <Pressable testID="to-en" onPress={() => setLanguage('en')}>
         <Text>en</Text>
       </Pressable>
@@ -49,7 +49,7 @@ describe('I18nProvider', () => {
 
     // Resolves to FR once the (absent) persisted value loads.
     await waitFor(() => expect(screen.getByTestId('lang')).toHaveTextContent('fr'));
-    expect(screen.getByTestId('title')).toHaveTextContent('Connexion');
+    expect(screen.getByTestId('title')).toHaveTextContent('Se connecter');
 
     fireEvent.press(screen.getByTestId('to-en'));
 
