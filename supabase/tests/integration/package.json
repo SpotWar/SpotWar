@@ -1,0 +1,13 @@
+{
+  "name": "spotwar-auth-integration-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Integration tests for the SpotWar auth + profiles schema against the local Supabase stack.",
+  "type": "module",
+  "scripts": {
+    "test": "node auth.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
