@@ -6,6 +6,7 @@ import { colors, fonts } from '../../theme/tokens';
 import { useAuth } from '../../lib/auth';
 import { useI18n } from '../../lib/i18n';
 import { supabase } from '../../lib/supabase';
+import { verifyEmailRedirect } from '../../lib/redirects';
 import {
   AuthShell,
   NButton,
@@ -49,7 +50,13 @@ export default function VerifyEmail() {
   const onResend = async () => {
     if (seconds > 0 || !email) return;
     setResent(false);
-    await supabase.auth.resend({ type: 'signup', email });
+    // Resend the same verification link, pointed at the same redirect target as
+    // the original signUp so a tapped link routes back into the app.
+    await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: verifyEmailRedirect() },
+    });
     setResent(true);
     setSeconds(RESEND_COOLDOWN);
   };

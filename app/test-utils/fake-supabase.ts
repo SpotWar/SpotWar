@@ -26,8 +26,12 @@ export type FakeAuthOptions = {
 export type SignUpCall = {
   email: string;
   password: string;
-  options?: { data?: Record<string, unknown> };
+  // `data` carries the user metadata; `emailRedirectTo` is the verify-link target
+  // 03 supplies (subtask 02 forwards it under `options`).
+  options?: { data?: Record<string, unknown>; emailRedirectTo?: string };
 };
+
+export type ResetCall = { email: string; redirectTo?: string };
 
 export type FakeAuthClient = {
   auth: {
@@ -37,7 +41,10 @@ export type FakeAuthClient = {
     signUp: (args: SignUpCall) => Promise<{ data: { user: unknown; session: unknown }; error: AuthErrorLike }>;
     signInWithPassword: (args: { email: string; password: string }) => Promise<{ error: AuthErrorLike }>;
     signOut: () => Promise<{ error: null }>;
-    resetPasswordForEmail: (email: string) => Promise<{ error: null }>;
+    resetPasswordForEmail: (
+      email: string,
+      options?: { redirectTo?: string },
+    ) => Promise<{ error: null }>;
   };
   from: (table: string) => {
     select: () => {
@@ -46,13 +53,13 @@ export type FakeAuthClient = {
   };
   /** Recorded signUp invocations. */
   signUpCalls: SignUpCall[];
-  /** Recorded reset-password emails. */
-  resetCalls: string[];
+  /** Recorded reset-password requests (email + redirectTo). */
+  resetCalls: ResetCall[];
 };
 
 export function makeFakeAuthClient(opts: FakeAuthOptions = {}): FakeAuthClient {
   const signUpCalls: SignUpCall[] = [];
-  const resetCalls: string[] = [];
+  const resetCalls: ResetCall[] = [];
 
   return {
     signUpCalls,
@@ -78,8 +85,8 @@ export function makeFakeAuthClient(opts: FakeAuthOptions = {}): FakeAuthClient {
       },
       signInWithPassword: async () => ({ error: opts.signInError ?? null }),
       signOut: async () => ({ error: null }),
-      resetPasswordForEmail: async (email) => {
-        resetCalls.push(email);
+      resetPasswordForEmail: async (email, options) => {
+        resetCalls.push({ email, redirectTo: options?.redirectTo });
         return { error: null };
       },
     },

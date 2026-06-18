@@ -32,6 +32,14 @@ jest.mock('lucide-react-native', () => {
   );
 });
 
+// expo-linking's createURL needs the expo-constants manifest at runtime (a
+// scheme to build deep links from), which jest doesn't provide — so it throws.
+// Mock it to a deterministic scheme so the redirect helpers resolve to a stable
+// `spotwar://<path>` in tests.
+jest.mock('expo-linking', () => ({
+  createURL: (path) => `spotwar://${String(path).replace(/^\//, '')}`,
+}));
+
 // expo-secure-store is a native module with no JS fallback under jest; mock it
 // with an in-memory map so storage.ts's native branch is exercisable in tests.
 jest.mock('expo-secure-store', () => {

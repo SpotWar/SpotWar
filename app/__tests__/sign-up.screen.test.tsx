@@ -70,4 +70,8 @@ it('gates submit on valid+terms, enforces the uppercase policy, and routes to ve
     nametag: 'maxime_t',
     preferred_language: 'fr',
   });
+  // …and forwarded a verification redirect target (subtask 02's emailRedirectTo
+  // passthrough) so the email link routes back into the app.
+  expect(typeof client.signUpCalls[0].options?.emailRedirectTo).toBe('string');
+  expect(client.signUpCalls[0].options?.emailRedirectTo).toBeTruthy();
 });

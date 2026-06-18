@@ -12,6 +12,7 @@ import {
   passwordStrength,
 } from '../../lib/validation';
 import { mapSignUpError } from '../../lib/auth-errors';
+import { verifyEmailRedirect } from '../../lib/redirects';
 import {
   AuthShell,
   NButton,
@@ -95,6 +96,9 @@ export default function SignUp() {
       password,
       nametag: nametag.trim(),
       preferred_language: language,
+      // Point the verification link back at the app so the gate routes the
+      // now-confirmed user in (01 allow-lists this URL).
+      emailRedirectTo: verifyEmailRedirect(),
     });
     setSubmitting(false);
 

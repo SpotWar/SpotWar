@@ -6,6 +6,7 @@ import { colors, fonts } from '../../theme/tokens';
 import { useAuth } from '../../lib/auth';
 import { useI18n } from '../../lib/i18n';
 import { isValidEmail } from '../../lib/validation';
+import { resetPasswordRedirect } from '../../lib/redirects';
 import {
   AuthShell,
   NButton,
@@ -41,7 +42,8 @@ export default function ForgotPassword() {
   const onSubmit = async () => {
     if (!canSubmit || submitting) return;
     setSubmitting(true);
-    await resetPassword(email.trim());
+    // The reset link must land on the /reset-password route (01 allow-lists it).
+    await resetPassword(email.trim(), resetPasswordRedirect());
     setSubmitting(false);
     setSent(true);
   };
