@@ -40,6 +40,9 @@ const fr = {
   'language.english': 'English',
   'language.englishRegion': 'Canada',
 
+  'settings.title': 'Réglages',
+  'settings.language': 'Langue',
+
   'auth.welcome.tag': 'Montréal · Saison 01',
   'auth.welcome.title': 'Conquiers ta\nville. Une\ncourse à la fois.',
   'auth.welcome.body':
@@ -129,6 +132,9 @@ const en: Dict = {
   'language.frenchRegion': 'Québec',
   'language.english': 'English',
   'language.englishRegion': 'Canada',
+
+  'settings.title': 'Settings',
+  'settings.language': 'Language',
 
   'auth.welcome.tag': 'Montréal · Season 01',
   'auth.welcome.title': 'Claim your\ncity. One run\nat a time.',
