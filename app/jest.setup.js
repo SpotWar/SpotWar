@@ -40,6 +40,14 @@ jest.mock('expo-linking', () => ({
   createURL: (path) => `spotwar://${String(path).replace(/^\//, '')}`,
 }));
 
+// expo-localization is a native module with no JS fallback under jest. Any tree
+// that mounts I18nProvider calls getLocales() on first launch, so stub it
+// globally with a French device by default; the i18n suite overrides the return
+// value per-test to exercise other locales.
+jest.mock('expo-localization', () => ({
+  getLocales: jest.fn(() => [{ languageCode: 'fr' }]),
+}));
+
 // expo-secure-store is a native module with no JS fallback under jest; mock it
 // with an in-memory map so storage.ts's native branch is exercisable in tests.
 jest.mock('expo-secure-store', () => {
