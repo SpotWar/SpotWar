@@ -18,6 +18,7 @@ import {
   initialAuthState,
   type Profile,
 } from './auth-state';
+import type { Language } from './i18n';
 
 // Re-export so existing consumers keep importing `Profile` from here.
 export type { Profile } from './auth-state';
@@ -42,6 +43,10 @@ export type AuthActions = {
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<AuthResult>;
   resetPassword: (email: string, redirectTo?: string) => Promise<AuthResult>;
+  // Persist the language choice onto the caller's profile so it follows them to
+  // another device. A no-op (returns success) when no one is signed in — the
+  // i18n layer still keeps the device-local copy in that case.
+  updatePreferredLanguage: (lang: Language) => Promise<AuthResult>;
 };
 
 /**
@@ -50,8 +55,14 @@ export type AuthActions = {
  * `redirectTo`, and `{ nametag, preferred_language }` as `options.data`) is
  * unit-testable against a fake client without mounting the provider — rendering
  * it under RTL is blocked by supabase-js's effect on the test renderer.
+ *
+ * `userId` scopes the profile write to the signed-in user; the provider passes
+ * the live session's id (undefined when signed out, making the write a no-op).
  */
-export function makeAuthActions(client: SupabaseClient): AuthActions {
+export function makeAuthActions(
+  client: SupabaseClient,
+  userId?: string,
+): AuthActions {
   return {
     signUp: async ({
       email,
@@ -87,6 +98,20 @@ export function makeAuthActions(client: SupabaseClient): AuthActions {
       });
       return { error };
     },
+    updatePreferredLanguage: async (lang) => {
+      // No session → nothing to sync; the device-local copy is the source of
+      // truth for a logged-out user. RLS only allows owners to update their own
+      // row, so scoping by `userId` is both correct and a defensive guard.
+      if (!userId) return { error: null };
+      const { error } = await client
+        .from('profiles')
+        .update({ preferred_language: lang })
+        .eq('id', userId);
+      // `error` is a PostgrestError here, not an AuthError, but every consumer
+      // only branches on its truthiness — the uniform AuthResult shape is what
+      // matters. Cast to keep that one return type across all the actions.
+      return { error: (error as unknown as AuthError) ?? null };
+    },
   };
 }
 
@@ -107,6 +132,9 @@ type AuthContextValue = {
   // `redirectTo` is where the reset-password email link lands; optional so 03
   // can supply the per-platform URL (01 allow-lists it in additional_redirect_urls).
   resetPassword: (email: string, redirectTo?: string) => Promise<AuthResult>;
+  // Write the language onto the signed-in user's profile (no-op when signed
+  // out). The i18n layer calls this from `setLanguage`.
+  updatePreferredLanguage: (lang: Language) => Promise<AuthResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -174,7 +202,7 @@ export function AuthProvider({
       user: session?.user ?? null,
       profile,
       loading,
-      ...makeAuthActions(client),
+      ...makeAuthActions(client, session?.user?.id),
     };
   }, [client, session, profile, loading]);
 

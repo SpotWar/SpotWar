@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 
 import SignUp from '../app/(auth)/sign-up';
-import { AuthProvider } from '../lib/auth';
 import { Providers, waitForTestId } from '../test-utils/render';
 import { makeFakeAuthClient } from '../test-utils/fake-supabase';
 
@@ -31,10 +30,8 @@ it('does not navigate to verify-email when signUp returns a 23505', async () => 
     signUpError: { code: '23505', message: 'duplicate key value' },
   });
   render(
-    <Providers>
-      <AuthProvider client={client as never}>
-        <SignUp />
-      </AuthProvider>
+    <Providers client={client as never}>
+      <SignUp />
     </Providers>,
   );
 

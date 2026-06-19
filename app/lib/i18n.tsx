@@ -4,12 +4,14 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
 import { getLocales } from 'expo-localization';
 
 import { persistedStore } from './storage';
+import { useAuth } from './auth';
 
 /**
  * Bilingual FR/EN strings for the auth flow. FR is the default and the source of
@@ -251,8 +253,13 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const { profile, updatePreferredLanguage } = useAuth();
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [loading, setLoading] = useState(true);
+  // Which profile's language we've already adopted (by user id). Declared above
+  // the mount effect because that effect must defer to a profile that already
+  // won the race — the two resolve asynchronously and profile out-ranks device.
+  const adoptedProfileId = useRef<string | null>(null);
 
   // Load the persisted choice once. Until it resolves we render with the default
   // (FR); `loading` lets a consumer hold a splash if it would rather not show FR
@@ -263,6 +270,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       .getItem(LANGUAGE_STORAGE_KEY)
       .then((stored) => {
         if (cancelled) return;
+        // Profile (if a signed-in user's already resolved) out-ranks the device
+        // sources, so don't overwrite a language the adoption effect set — the
+        // two effects race on a cold start with a restored session.
+        if (adoptedProfileId.current) return;
         // A persisted choice wins; otherwise seed from the device/browser locale
         // on first launch (DEFAULT_LANGUAGE stays the final fallback inside the
         // helper). We don't persist this guess — only an explicit setLanguage does.
@@ -276,12 +287,39 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const setLanguage = useCallback(async (next: Language) => {
-    // Update state first so the UI flips immediately, then persist; a failed
-    // write (e.g. SecureStore unavailable) still leaves the in-memory choice.
-    setLanguageState(next);
-    await persistedStore.setItem(LANGUAGE_STORAGE_KEY, next);
-  }, []);
+  // Highest-precedence source: a signed-in user's profile language follows them
+  // across devices. We adopt it exactly once per user (keyed by profile id) so a
+  // language the user changes *after* login isn't clobbered by the now-stale
+  // profile object (we don't refetch it on a local change). The reducer already
+  // guarantees `profile` belongs to the live session, so it's safe to apply.
+  useEffect(() => {
+    if (!profile) {
+      // Signed out: reset so the next login re-adopts its profile language.
+      adoptedProfileId.current = null;
+      return;
+    }
+    if (adoptedProfileId.current === profile.id) return;
+    adoptedProfileId.current = profile.id;
+    // `fetchProfile` casts the row rather than validating it, so guard against a
+    // NULL/legacy `preferred_language` reaching the dictionary lookup — fall back
+    // to whatever the device sources already resolved rather than a broken locale.
+    if (isLanguage(profile.preferred_language)) {
+      setLanguageState(profile.preferred_language);
+    }
+  }, [profile]);
+
+  const setLanguage = useCallback(
+    async (next: Language) => {
+      // Update state first so the UI flips immediately, then persist; a failed
+      // write (e.g. SecureStore unavailable) still leaves the in-memory choice.
+      setLanguageState(next);
+      await persistedStore.setItem(LANGUAGE_STORAGE_KEY, next);
+      // Mirror onto the profile so the choice follows the user to other devices.
+      // A no-op for a logged-out user (the action guards on the session).
+      await updatePreferredLanguage(next);
+    },
+    [updatePreferredLanguage],
+  );
 
   const t = useCallback(
     (key: TranslationKey, vars?: TranslationVars) =>

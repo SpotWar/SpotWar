@@ -51,12 +51,14 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <I18nProvider>
-        <AuthProvider>
+      {/* Auth wraps i18n so the I18nProvider can read `useAuth()` and adopt the
+          signed-in user's `profile.preferred_language` across devices. */}
+      <AuthProvider>
+        <I18nProvider>
           <StatusBar style="light" />
           <AuthGate />
-        </AuthProvider>
-      </I18nProvider>
+        </I18nProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

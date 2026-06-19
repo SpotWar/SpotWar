@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 
 import ForgotPassword from '../app/(auth)/forgot-password';
-import { AuthProvider } from '../lib/auth';
 import { Providers, waitForTestId } from '../test-utils/render';
 import { makeFakeAuthClient } from '../test-utils/fake-supabase';
 
@@ -20,10 +19,8 @@ jest.mock('expo-router', () => ({
 it('sends a reset email with a /reset-password redirect and confirms inline', async () => {
   const client = makeFakeAuthClient();
   render(
-    <Providers>
-      <AuthProvider client={client as never}>
-        <ForgotPassword />
-      </AuthProvider>
+    <Providers client={client as never}>
+      <ForgotPassword />
     </Providers>,
   );
 
