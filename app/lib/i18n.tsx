@@ -7,6 +7,8 @@ import React, {
   useState,
 } from 'react';
 
+import { getLocales } from 'expo-localization';
+
 import { persistedStore } from './storage';
 
 /**
@@ -204,6 +206,18 @@ function isLanguage(value: string | null): value is Language {
   return value === 'fr' || value === 'en';
 }
 
+/**
+ * First-launch language guess from the device/browser locale (works on web too).
+ * `getLocales()` is ordered by user preference; we read the bare `languageCode`
+ * (`'fr'`, not `'fr-CA'`) of the top entry and, since EN is our only non-FR
+ * language, treat anything that isn't English as the default. Empty list (no
+ * locale resolvable) falls through to `DEFAULT_LANGUAGE`. This only seeds the
+ * *initial* value — a persisted choice always wins over it (see the mount effect).
+ */
+export function deviceDefaultLanguage(): Language {
+  return getLocales()[0]?.languageCode === 'en' ? 'en' : DEFAULT_LANGUAGE;
+}
+
 /** Named `{placeholder}` substitutions passed to `t()` / `translate()`. */
 export type TranslationVars = Record<string, string | number>;
 
@@ -249,7 +263,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       .getItem(LANGUAGE_STORAGE_KEY)
       .then((stored) => {
         if (cancelled) return;
-        if (isLanguage(stored)) setLanguageState(stored);
+        // A persisted choice wins; otherwise seed from the device/browser locale
+        // on first launch (DEFAULT_LANGUAGE stays the final fallback inside the
+        // helper). We don't persist this guess — only an explicit setLanguage does.
+        setLanguageState(isLanguage(stored) ? stored : deviceDefaultLanguage());
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
