@@ -6,8 +6,9 @@
  *
  * It implements just enough: `auth.onAuthStateChange` (fires once with the
  * configured session, like the real one), `signUp` / `signInWithPassword` /
- * `signOut` / `resetPasswordForEmail`, and a `from().select().eq().maybeSingle()`
- * chain for the profile read. Calls are recorded for assertions.
+ * `signOut` / `resetPasswordForEmail`, a `from().select().eq().maybeSingle()`
+ * chain for the profile read, and a `from().update().eq()` chain for the
+ * preferred-language write-back. Calls are recorded for assertions.
  */
 
 type AuthErrorLike = { message?: string; code?: string } | null;
@@ -21,6 +22,10 @@ export type FakeAuthOptions = {
   signInError?: AuthErrorLike;
   /** The session the provider restores on mount via onAuthStateChange. */
   initialSession?: unknown;
+  /** Profile row the `from('profiles').select()...maybeSingle()` read returns. */
+  profileRow?: unknown;
+  /** Error returned from the profile update (write-back). Default: success. */
+  updateError?: AuthErrorLike;
 };
 
 export type SignUpCall = {
@@ -32,6 +37,14 @@ export type SignUpCall = {
 };
 
 export type ResetCall = { email: string; redirectTo?: string };
+
+/** A recorded `from(table).update(values).eq(column, value)` write. */
+export type UpdateCall = {
+  table: string;
+  values: Record<string, unknown>;
+  eqColumn: string;
+  eqValue: unknown;
+};
 
 export type FakeAuthClient = {
   auth: {
@@ -48,22 +61,32 @@ export type FakeAuthClient = {
   };
   from: (table: string) => {
     select: () => {
-      eq: () => { maybeSingle: () => Promise<{ data: null; error: null }> };
+      eq: () => { maybeSingle: () => Promise<{ data: unknown; error: null }> };
+    };
+    update: (values: Record<string, unknown>) => {
+      eq: (
+        column: string,
+        value: unknown,
+      ) => Promise<{ data: null; error: AuthErrorLike }>;
     };
   };
   /** Recorded signUp invocations. */
   signUpCalls: SignUpCall[];
   /** Recorded reset-password requests (email + redirectTo). */
   resetCalls: ResetCall[];
+  /** Recorded profile update (write-back) invocations. */
+  updateCalls: UpdateCall[];
 };
 
 export function makeFakeAuthClient(opts: FakeAuthOptions = {}): FakeAuthClient {
   const signUpCalls: SignUpCall[] = [];
   const resetCalls: ResetCall[] = [];
+  const updateCalls: UpdateCall[] = [];
 
   return {
     signUpCalls,
     resetCalls,
+    updateCalls,
     auth: {
       onAuthStateChange: (cb) => {
         // Fire synchronously with the restored session (the real client emits an
@@ -90,9 +113,17 @@ export function makeFakeAuthClient(opts: FakeAuthOptions = {}): FakeAuthClient {
         return { error: null };
       },
     },
-    from: () => ({
+    from: (table) => ({
       select: () => ({
-        eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }),
+        eq: () => ({
+          maybeSingle: async () => ({ data: opts.profileRow ?? null, error: null }),
+        }),
+      }),
+      update: (values) => ({
+        eq: async (column, value) => {
+          updateCalls.push({ table, values, eqColumn: column, eqValue: value });
+          return { data: null, error: opts.updateError ?? null };
+        },
       }),
     }),
   };

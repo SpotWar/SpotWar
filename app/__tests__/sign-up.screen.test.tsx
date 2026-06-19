@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 
 import SignUp from '../app/(auth)/sign-up';
-import { AuthProvider } from '../lib/auth';
 import { Providers, waitForTestId } from '../test-utils/render';
 import { makeFakeAuthClient } from '../test-utils/fake-supabase';
 
@@ -34,10 +33,8 @@ function submitState() {
 it('gates submit on valid+terms, enforces the uppercase policy, and routes to verify on success', async () => {
   const client = makeFakeAuthClient(); // success, no session (confirmations on)
   render(
-    <Providers>
-      <AuthProvider client={client as never}>
-        <SignUp />
-      </AuthProvider>
+    <Providers client={client as never}>
+      <SignUp />
     </Providers>,
   );
 

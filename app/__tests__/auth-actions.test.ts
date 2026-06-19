@@ -11,10 +11,24 @@ function makeSpyClient() {
   const signInWithPassword = jest.fn(async () => ({ data: {}, error: null }));
   const signOut = jest.fn(async () => ({ error: null }));
   const resetPasswordForEmail = jest.fn(async () => ({ data: {}, error: null }));
+  // `from(table).update(values).eq(column, value)` for the profile write-back.
+  const eq = jest.fn(async () => ({ data: null, error: null }));
+  const update = jest.fn(() => ({ eq }));
+  const from = jest.fn(() => ({ update }));
   const client = {
     auth: { signUp, signInWithPassword, signOut, resetPasswordForEmail },
+    from,
   } as unknown as SupabaseClient;
-  return { client, signUp, signInWithPassword, signOut, resetPasswordForEmail };
+  return {
+    client,
+    signUp,
+    signInWithPassword,
+    signOut,
+    resetPasswordForEmail,
+    from,
+    update,
+    eq,
+  };
 }
 
 describe('makeAuthActions', () => {
@@ -80,5 +94,24 @@ describe('makeAuthActions', () => {
     });
     await actions.signOut();
     expect(signOut).toHaveBeenCalled();
+  });
+
+  it('updatePreferredLanguage writes the language onto the user row', async () => {
+    const { client, from, update, eq } = makeSpyClient();
+    const result = await makeAuthActions(client, 'user-1').updatePreferredLanguage(
+      'en',
+    );
+    expect(from).toHaveBeenCalledWith('profiles');
+    expect(update).toHaveBeenCalledWith({ preferred_language: 'en' });
+    expect(eq).toHaveBeenCalledWith('id', 'user-1');
+    expect(result.error).toBeNull();
+  });
+
+  it('updatePreferredLanguage is a no-op with no signed-in user', async () => {
+    const { client, from } = makeSpyClient();
+    const result = await makeAuthActions(client).updatePreferredLanguage('en');
+    // No userId → never touches the table; the device-local copy is enough.
+    expect(from).not.toHaveBeenCalled();
+    expect(result.error).toBeNull();
   });
 });
